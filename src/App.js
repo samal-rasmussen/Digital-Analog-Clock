@@ -1,6 +1,5 @@
 import './styles/clock.css';
 import React, { useEffect, useRef, useState } from 'react';
-import tick from "./sound/tick.mp3";
 import { MdLightMode, MdOutlineDarkMode } from "react-icons/md";
 
 function App() {
@@ -10,9 +9,6 @@ function App() {
     const hourref = useRef();
     const mintref = useRef();
     const secdref = useRef();
-    const hidbref = useRef();
-    const audiref = useRef();
-    const waitref = useRef(waitFunction);
     const addnumberref = useRef(addNumbers);
 
     const [digitaltime, setDigitalTime] = useState("00 : 00 : 00");
@@ -20,7 +16,6 @@ function App() {
     const [digitaldate, setDigitalDate] = useState("DD-MM-YYYY");
     const [darkmode, setDarkMode] = useState(true);
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
-    const [muted, setMuted] = useState(false);
 
     const monthObj = {
         1: "Jan",
@@ -41,24 +36,6 @@ function App() {
 
     const handleResize = () => {
         setWindowWidth(window.innerWidth);
-    };
-
-    const playSound = () => {
-        setMuted(false);
-        const audio = new Audio();
-        audio.src = tick;
-        audio.oncanplaythrough = (event) => {
-            var playedPromise = audio.play();
-            if (playedPromise) {
-                playedPromise.catch((e) => {
-                    if (e.name === 'NotAllowedError' || e.name === 'NotSupportedError') {
-                        console.log(e.name);
-                    }
-                }).then(() => {
-
-                });
-            }
-        }
     };
 
     function addNumbers(tag = '') {
@@ -135,27 +112,14 @@ function App() {
 
             setDigitalTime(`${formattedHours} : ${formattedMinutes} : ${formattedSeconds}`);
             setAmOrPm(`${hours > 12 ? "PM" : "AM"}`);
-            
-            if (!muted) {
-                playSound();
-            }
 
         }, 1000);
     }
 
-    function waitFunction() {
-        setTimeout(() => {
-            start();
-            const popup = audiref.current
-            popup.style.display = "none";
-        }, 2000);
-    }
-
     useEffect(() => {
-        waitref.current();
+        start();
         window.addEventListener('resize', handleResize);
         addnumberref.current("dark");
-        hidbref.current.click();
 
         return () => {
             window.removeEventListener('resize', handleResize);
@@ -165,8 +129,6 @@ function App() {
     return (
         <div className={`${darkmode ? "dark" : "light"}`}>
             <div className="main dark:bg-[#071b24]">
-                <button ref={hidbref} id="hiddenButton" style={{ display: 'none' }} onClick={playSound}></button>
-                <div ref={audiref} className='popup'><p>Click to Play audio</p></div>
                 <button onClick={() => { addNumbers(darkmode ? "" : "dark"); setDarkMode(!darkmode) }} className="absolute top-5 right-6 sm:right-8">{darkmode ? <MdLightMode className=" h-6 w-6 text-[#aef] sm:h-8 sm:w-8" /> : <MdOutlineDarkMode className="h-6 w-6 text-black sm:h-8 sm:w-8" />}</button>
                 <div className="clockcontainer">
                     <div className="clockcircle">
