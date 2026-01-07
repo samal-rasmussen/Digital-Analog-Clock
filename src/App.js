@@ -24,6 +24,7 @@ function App() {
 	const mintref = useRef();
 	const secdref = useRef();
 	const addnumberref = useRef(addNumbers);
+	const isFirstPaintRef = useRef(true);
 
 	const [digitaltime, setDigitalTime] = useState("00 : 00 : 00");
 	const [amorpm, setAmOrPm] = useState("--");
@@ -112,12 +113,42 @@ function App() {
 		const rotateminutehand = 6 * minutes;
 		const rotatesecondhand = 6 * seconds;
 
-		rotatehourhand === 0
-			? (hourstick.style.transition = "none")
-			: (hourstick.style.transition = "transform 1s ease");
-		rotateminutehand === 0
-			? (minutstick.style.transition = "none")
-			: (minutstick.style.transition = "transform 1s ease");
+		// On first paint, disable all transitions to jump directly to correct position
+		if (isFirstPaintRef.current) {
+			hourstick.style.transition = "none";
+			minutstick.style.transition = "none";
+			secondstick.style.transition = "none";
+			isFirstPaintRef.current = false;
+
+			// Re-enable transitions after the first paint
+			requestAnimationFrame(() => {
+				if (hourstick && minutstick && secondstick) {
+					hourstick.style.transition = "";
+					minutstick.style.transition = "";
+					secondstick.style.transition = "";
+				}
+			});
+		} else {
+			// Handle wraparound for hour and minute hands
+			if (rotatehourhand === 0) {
+				hourstick.style.transition = "none";
+			} else {
+				hourstick.style.transition = "transform 1s ease";
+			}
+
+			if (rotateminutehand === 0) {
+				minutstick.style.transition = "none";
+			} else {
+				minutstick.style.transition = "transform 1s ease";
+			}
+
+			// Handle wraparound for second hand
+			if (rotatesecondhand === 0) {
+				secondstick.style.transition = "none";
+			} else {
+				secondstick.style.transition = "transform 0.3s ease";
+			}
+		}
 
 		hourstick.style.transform = `translateY(-50%) rotate(${rotatehourhand}deg)`;
 		minutstick.style.transform = `${windowWidth > 540 ? "translateY(-50%)" : "translate(-4%,-50%)"} rotate(${rotateminutehand}deg)`;
