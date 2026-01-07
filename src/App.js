@@ -200,7 +200,7 @@ function App() {
 
 	return (
 		<div className={`${darkmode ? "dark" : "light"}`}>
-			<div className="main dark:bg-[#071b24]">
+			<div className="main">
 				<button
 					onClick={() => setSettingsOpen(true)}
 					className="settingsButton"
@@ -259,32 +259,20 @@ function App() {
 				)}
 				<div className="clockcontainer">
 					<div className="clockcircle">
-						<div ref={numbref} className="numbers dark:text-[#355a6a]"></div>
+						<div ref={numbref} className="numbers"></div>
 						<div ref={tickref} className="ticks"></div>
-						<div ref={hourref} className="hour bg-black dark:bg-[#3b200a]">
-							<span className="hourleft"></span>
-							<span className="hourright"></span>
-						</div>
-						<div ref={mintref} className="minute dark:bg-[#eedddd]">
-							<span className="minuteleft"></span>
-							<span className="minuteright"></span>
-						</div>
+						<div ref={hourref} className="hour"></div>
+						<div ref={mintref} className="minute"></div>
 						<span ref={secdref} className="second"></span>
 					</div>
 				</div>
 				<div className="clockmanager">
-					<div className="datecontainer dark:bg-[#9993721a]">
-						<span className="date dark:text-[#EEDDDD]">{digitaldate}</span>
+					<div className="datecontainer">
+						<span className="date">{digitaldate}</span>
 					</div>
 					<div className="">
-						<span className="timecontainer dark:text-[#EEDDDD] dark:bg-[#9993721a]">
-							{digitaltime}
-						</span>
-						{!use24Hour && (
-							<span className="amorpm dark:text-[#EEDDDD] dark:bg-[#9993721a]">
-								{amorpm}
-							</span>
-						)}
+						<span className="timecontainer">{digitaltime}</span>
+						{!use24Hour && <span className="amorpm">{amorpm}</span>}
 					</div>
 				</div>
 			</div>
