@@ -1,6 +1,6 @@
 import "./styles/clock.css";
 import React, { useEffect, useRef, useState, useCallback } from "react";
-import { MdSettings } from "react-icons/md";
+import { MdSettings, MdFullscreen, MdFullscreenExit } from "react-icons/md";
 
 const monthObj = {
 	1: "Jan",
@@ -33,6 +33,7 @@ function App() {
 	const [darkmode, setDarkMode] = useState(true);
 	const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 	const [settingsOpen, setSettingsOpen] = useState(false);
+	const [isFullscreen, setIsFullscreen] = useState(() => Boolean(document.fullscreenElement));
 
 	// Detect browser locale default for 24h format
 	const getDefault24Hour = () => {
@@ -251,6 +252,18 @@ function App() {
 		}
 	};
 
+	const toggleFullscreen = async () => {
+		try {
+			if (document.fullscreenElement) {
+				await document.exitFullscreen();
+			} else {
+				await document.documentElement.requestFullscreen();
+			}
+		} catch (error) {
+			console.error("Error toggling fullscreen:", error);
+		}
+	};
+
 	useEffect(() => {
 		const handleEscape = (e) => {
 			if (e.key === "Escape" && settingsOpen) {
@@ -261,9 +274,39 @@ function App() {
 		return () => window.removeEventListener("keydown", handleEscape);
 	}, [settingsOpen]);
 
+	// Sync fullscreen state with browser
+	useEffect(() => {
+		const handleFullscreenChange = () => {
+			setIsFullscreen(Boolean(document.fullscreenElement));
+		};
+
+		document.addEventListener("fullscreenchange", handleFullscreenChange);
+		document.addEventListener("webkitfullscreenchange", handleFullscreenChange);
+		document.addEventListener("mozfullscreenchange", handleFullscreenChange);
+		document.addEventListener("MSFullscreenChange", handleFullscreenChange);
+
+		return () => {
+			document.removeEventListener("fullscreenchange", handleFullscreenChange);
+			document.removeEventListener("webkitfullscreenchange", handleFullscreenChange);
+			document.removeEventListener("mozfullscreenchange", handleFullscreenChange);
+			document.removeEventListener("MSFullscreenChange", handleFullscreenChange);
+		};
+	}, []);
+
 	return (
 		<div className={`${darkmode ? "dark" : "light"}`}>
 			<div className="main">
+				<button
+					onClick={toggleFullscreen}
+					className="fullscreenButton"
+					aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+				>
+					{isFullscreen ? (
+						<MdFullscreenExit className="fullscreenIcon" />
+					) : (
+						<MdFullscreen className="fullscreenIcon" />
+					)}
+				</button>
 				<button
 					onClick={() => setSettingsOpen(true)}
 					className="settingsButton"
