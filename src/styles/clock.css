@@ -37,6 +37,8 @@
     display: flex;
     background-color: var(--bg);
     color: var(--text);
+    padding: 20px;
+    gap: 20px;
 }
 
 .popup {
@@ -60,18 +62,18 @@
 }
 
 .clockcontainer {
-    height: 100vh;
-    width: 50%;
+    flex: 1;
     display: flex;
     justify-content: center;
     align-items: center;
-
+    min-height: 0;
 }
 
 .clockcircle {
     position: relative;
-    height: 500px;
-    width: 500px;
+    width: clamp(280px, 70vmin, 900px);
+    height: clamp(280px, 70vmin, 900px);
+    aspect-ratio: 1;
     border-radius: 50%;
     border: 3px solid var(--border);
     display: flex;
@@ -87,7 +89,7 @@
 
 .number {
     position: absolute;
-    font-size: 28px;
+    font-size: clamp(18px, 4vmin, 32px);
     font-weight: 600;
     rotate: 90deg;
     color: var(--text);
@@ -117,8 +119,8 @@
 .hour {
     position: absolute;
     background-color: var(--text);
-    height: 130px;
-    width: 8px;
+    height: clamp(65px, 13vmin, 130px);
+    width: clamp(4px, 0.8vmin, 8px);
     transform: translateY(-50%);
     z-index: 9;
     transform-origin: bottom center;
@@ -144,8 +146,8 @@
 
 .minute {
     position: absolute;
-    height: 150px;
-    width: 6px;
+    height: clamp(75px, 15vmin, 150px);
+    width: clamp(3px, 0.6vmin, 6px);
     background-color: var(--text);
     transform: translateY(-50%);
     z-index: 99;
@@ -172,8 +174,8 @@
 
 .second {
     position: absolute;
-    height: 200px;
-    width: 2px;
+    height: clamp(100px, 20vmin, 200px);
+    width: clamp(1px, 0.2vmin, 2px);
     transform: translateY(-50%);
     z-index: 999;
     background-color: var(--accent);
@@ -211,50 +213,50 @@
 
 
 .clockmanager {
-    height: 100vh;
-    width: 50%;
+    flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 30px;
+    gap: clamp(15px, 3vh, 30px);
     justify-content: center;
     align-items: center;
+    min-height: 0;
 }
 
 .datecontainer {
-    padding: 20px;
-    padding-left: 30px;
-    padding-right: 30px;
+    padding: clamp(10px, 2vh, 20px);
+    padding-left: clamp(15px, 3vw, 30px);
+    padding-right: clamp(15px, 3vw, 30px);
     background-color: var(--surface2);
     color: var(--text);
     font-weight: 500;
-    font-size: 24px;
+    font-size: clamp(16px, 2.5vw, 24px);
     border-radius: 12px;
     border: 1px solid var(--border);
 }
 
 .timecontainer {
-    padding: 20px;
-    padding-left: 30px;
-    padding-right: 30px;
+    padding: clamp(10px, 2vh, 20px);
+    padding-left: clamp(15px, 3vw, 30px);
+    padding-right: clamp(15px, 3vw, 30px);
     background-color: var(--surface2);
     color: var(--text);
     font-weight: 500;
-    font-size: 45px;
+    font-size: clamp(28px, 5vw, 45px);
     border-radius: 12px;
     border: 1px solid var(--border);
     font-variant-numeric: tabular-nums;
 }
 
 .amorpm {
-    padding: 18px;
-    padding-left: 26px;
-    padding-right: 26px;
+    padding: clamp(9px, 1.8vh, 18px);
+    padding-left: clamp(13px, 2.6vw, 26px);
+    padding-right: clamp(13px, 2.6vw, 26px);
     background-color: var(--surface2);
     color: var(--mutedText);
     font-weight: 500;
-    font-size: 43px;
+    font-size: clamp(26px, 4.8vw, 43px);
     border-radius: 12px;
-    margin-left: 15px;
+    margin-left: clamp(8px, 1.5vw, 15px);
     border: 1px solid var(--border);
 }
 
@@ -471,75 +473,20 @@
 @media(max-width:1024px) {
     .main {
         flex-direction: column;
+        padding: clamp(10px, 2vh, 20px);
     }
 
     .clockcontainer {
-        height: auto;
-        width: 100vw;
-        margin-top: 6vw;
+        min-height: 50vh;
     }
 
     .clockmanager {
-        height: auto;
-        width: 100vw;
-        margin-top: 10vw;
+        min-height: 40vh;
     }
 }
 
 @media(max-width:540px) {
-    .clockcircle {
-        height: 350px;
-        width: 350px;
-    }
-
-    .hour {
-        height: 80px;
-        width: 6px;
-    }
-
     .minute {
-        height: 100px;
-        width: 4px;
         transform: translate(4%, -50%);
     }
-
-    .second {
-        height: 140px;
-        width: 2px;
-    }
-
-    .second::after {
-        height: 6px;
-        width: 6px;
-    }
-
-    .datecontainer {
-        padding: 10px;
-        padding-left: 15px;
-        padding-right: 15px;
-        font-weight: 500;
-        font-size: 20px;
-        border-radius: 10px;
-    }
-
-    .timecontainer {
-        padding: 10px;
-        padding-left: 15px;
-        padding-right: 15px;
-        font-weight: 500;
-        font-size: 32px;
-        border-radius: 10px;
-        font-variant-numeric: tabular-nums;
-    }
-
-    .amorpm {
-        padding: 9px;
-        padding-left: 15px;
-        padding-right: 15px;
-        font-weight: 500;
-        font-size: 30px;
-        border-radius: 10px;
-        margin-left: 8px;
-    }
-
 }

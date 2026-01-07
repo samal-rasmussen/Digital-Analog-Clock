@@ -23,6 +23,7 @@ function App() {
 	const hourref = useRef();
 	const mintref = useRef();
 	const secdref = useRef();
+	const clockcircleref = useRef();
 	const addnumberref = useRef(addNumbers);
 	const isFirstPaintRef = useRef(true);
 
@@ -61,24 +62,32 @@ function App() {
 	function addNumbers(tag = "") {
 		const numbersContainer = numbref.current;
 		const tickcontainer = tickref.current;
-		const radius = windowWidth > 540 ? 210 : 140;
-		const tickradius = windowWidth > 540 ? 235 : 163;
-		const horshift = -15;
-		const vershift = -10;
+		const clockCircle = clockcircleref.current;
+
+		if (!numbersContainer || !tickcontainer || !clockCircle) return;
+
+		// Compute radii from actual clock circle size
+		const clockSize = clockCircle.clientWidth;
+		const clockRadius = clockSize / 2;
+		const numberRadius = clockRadius * 0.75; // Numbers at 75% of radius
+		const tickRadius = clockRadius * 0.88; // Ticks at 88% of radius
+
+		// Calculate shifts based on clock size
+		const horshift = -clockSize * 0.03; // ~3% of clock size
+		const vershift = -clockSize * 0.02; // ~2% of clock size
 
 		numbersContainer.innerHTML = "";
 		tickcontainer.innerHTML = "";
 
 		for (let i = 1; i <= 12; i++) {
 			const angle = i * 30 * (Math.PI / 180);
-			const x = Math.round(radius * Math.cos(angle));
-			const y = Math.round(radius * Math.sin(angle));
+			const x = Math.round(numberRadius * Math.cos(angle));
+			const y = Math.round(numberRadius * Math.sin(angle));
 
 			const number = document.createElement("span");
 			number.className = "number";
 			number.style.left = `${x + horshift}px`;
 			number.style.top = `${y + vershift}px`;
-			number.style.lineHeight = "24px";
 			number.textContent = i;
 
 			numbersContainer.appendChild(number);
@@ -86,13 +95,13 @@ function App() {
 
 		for (let i = 1; i <= 60; i++) {
 			const angle = i * 6 * (Math.PI / 180);
-			const x = Math.round(tickradius * Math.cos(angle));
-			const y = Math.round(tickradius * Math.sin(angle));
+			const x = Math.round(tickRadius * Math.cos(angle));
+			const y = Math.round(tickRadius * Math.sin(angle));
 
 			const tick = document.createElement("span");
 			tick.className = `${tag}tick`;
-			tick.style.left = `${x - 4}px`;
-			tick.style.top = `${y - 2}px`;
+			tick.style.left = `${x - 2}px`;
+			tick.style.top = `${y - 1}px`;
 			tick.style.transform = `rotate(${i * 6}deg)`;
 			tickcontainer.appendChild(tick);
 		}
@@ -199,6 +208,29 @@ function App() {
 		};
 	}, []);
 
+	// Regenerate numbers/ticks when clock size changes or theme changes
+	useEffect(() => {
+		if (!clockcircleref.current) return;
+
+		const regenerateNumbers = () => {
+			addnumberref.current(darkmode ? "" : "dark");
+		};
+
+		// Initial generation
+		regenerateNumbers();
+
+		// Use ResizeObserver to watch clock circle size changes
+		const resizeObserver = new ResizeObserver(() => {
+			regenerateNumbers();
+		});
+
+		resizeObserver.observe(clockcircleref.current);
+
+		return () => {
+			resizeObserver.disconnect();
+		};
+	}, [darkmode]);
+
 	const handleDarkModeToggle = () => {
 		const newDarkMode = !darkmode;
 		setDarkMode(newDarkMode);
@@ -289,7 +321,7 @@ function App() {
 					</div>
 				)}
 				<div className="clockcontainer">
-					<div className="clockcircle">
+					<div ref={clockcircleref} className="clockcircle">
 						<div ref={numbref} className="numbers"></div>
 						<div ref={tickref} className="ticks"></div>
 						<div ref={hourref} className="hour"></div>
