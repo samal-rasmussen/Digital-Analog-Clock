@@ -15,7 +15,7 @@ A single-page React app that renders:
 ### Tech stack
 
 -   **React 18** + **Create React App** (`react-scripts`)
--   **CSS**: custom styles in `src/styles/clock.css` (theme variables + responsive sizing)
+-   **CSS**: single stylesheet in `src/index.css` (theme variables + layout + clock styling)
 -   **Icons**: `react-icons`
 
 ### Key commands
@@ -29,7 +29,7 @@ A single-page React app that renders:
 
 -   `src/index.js`: React entrypoint; renders `<App />`.
 -   `src/App.js`: **Main app logic**: clock math, interval loop, refs/DOM writes, settings modal, fullscreen.
--   `src/styles/clock.css`: Layout + theme + clock styling (dark/light, responsive sizing).
+-   `src/index.css`: Single stylesheet (global base + theme + clock styling).
 
 ### How the clock works (important for modifications)
 
@@ -96,10 +96,7 @@ src/
 ├── index.js          # Entry point, renders App
 ├── App.js            # Main component (clock + UI controls)
 ├── App.test.js       # Stale test (needs update)
-├── index.css         # Global styles (minimal)
-├── styles/
-│   └── clock.css     # Theme + layout + clock styling
-└── sound/            # Legacy assets (currently unused)
+└── index.css         # Single stylesheet (global + theme + layout + clock styling)
 ```
 
 ### Key functions/sections in `App.js`
