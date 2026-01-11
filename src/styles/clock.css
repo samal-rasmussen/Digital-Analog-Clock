@@ -85,20 +85,20 @@
 
 .numbers {
 	position: relative;
-	rotate: -90deg;
+	transform: rotate(-90deg);
 }
 
 .number {
 	position: absolute;
 	font-size: clamp(18px, 4vmin, 32px);
 	font-weight: 600;
-	rotate: 90deg;
+	transform: rotate(90deg);
 	color: var(--text);
 }
 
 .ticks {
 	position: relative;
-	rotate: -90deg;
+	transform: rotate(-90deg);
 }
 
 .tick {
