@@ -8,8 +8,8 @@
 }
 
 :root {
-	--base-tick-width: 6px;
-	--base-tick-height: 2px;
+	--base-tick-width: clamp(5px, 1.2vmin, 10px);
+	--base-tick-height: clamp(1.5px, 0.3vmin, 2px);
 }
 
 body {
@@ -141,8 +141,8 @@ code {
 }
 
 .hourTick {
-	--tick-width: 14px;
-	--tick-height: 3px;
+	--tick-width: clamp(10px, 2.1vmin, 22px);
+	--tick-height: clamp(2px, 0.5vmin, 3.5px);
 }
 
 .hour {
@@ -175,7 +175,7 @@ code {
 
 .minute {
 	position: absolute;
-	height: clamp(75px, 15vmin, 150px);
+	height: clamp(65px, 17vmin, 150px);
 	width: clamp(3px, 0.6vmin, 6px);
 	background-color: var(--text);
 	transform: translateY(-50%);
@@ -203,8 +203,8 @@ code {
 
 .second {
 	position: absolute;
-	height: clamp(100px, 20vmin, 200px);
-	width: clamp(1px, 0.2vmin, 2px);
+	height: clamp(80px, 22vmin, 200px);
+	width: clamp(1.5px, 0.3vmin, 2.5px);
 	transform: translateY(-50%);
 	z-index: 999;
 	background-color: var(--accent);
