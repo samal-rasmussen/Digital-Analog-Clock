@@ -7,10 +7,6 @@
 	font-style: normal;
 }
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
 /* Theme Variables */
 .light {
 	--bg: #f5f5f5;
@@ -215,7 +211,7 @@
 	padding: clamp(10px, 2vh, 20px);
 	padding-left: clamp(15px, 3vw, 30px);
 	padding-right: clamp(15px, 3vw, 30px);
-	background-color: var(--surface2);
+	background-color: var(--surface);
 	color: var(--text);
 	font-weight: 500;
 	font-size: clamp(16px, 2.5vw, 24px);
@@ -227,7 +223,7 @@
 	padding: clamp(10px, 2vh, 20px);
 	padding-left: clamp(15px, 3vw, 30px);
 	padding-right: clamp(15px, 3vw, 30px);
-	background-color: var(--surface2);
+	background-color: var(--surface);
 	color: var(--text);
 	font-weight: 500;
 	font-size: clamp(28px, 5vw, 45px);
@@ -240,7 +236,7 @@
 	padding: clamp(9px, 1.8vh, 18px);
 	padding-left: clamp(13px, 2.6vw, 26px);
 	padding-right: clamp(13px, 2.6vw, 26px);
-	background-color: var(--surface2);
+	background-color: var(--surface);
 	color: var(--mutedText);
 	font-weight: 500;
 	font-size: clamp(26px, 4.8vw, 43px);
