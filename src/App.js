@@ -59,7 +59,7 @@ function App() {
 		setWindowWidth(window.innerWidth);
 	};
 
-	function addNumbers(tag = "") {
+	function addNumbers() {
 		const numbersContainer = numbref.current;
 		const tickcontainer = tickref.current;
 		const clockCircle = clockcircleref.current;
@@ -69,8 +69,8 @@ function App() {
 		// Compute radii from actual clock circle size
 		const clockSize = clockCircle.clientWidth;
 		const clockRadius = clockSize / 2;
-		const numberRadius = clockRadius * 0.75; // Numbers at 75% of radius
-		const tickRadius = clockRadius * 0.88; // Ticks at 88% of radius
+		const numberRadius = clockRadius * 0.74; // Numbers at 74% of radius
+		const tickRadius = clockRadius * 0.89; // Ticks at 89% of radius
 
 		// Calculate shifts based on clock size
 		const horshift = -clockSize * 0.03; // ~3% of clock size
@@ -94,15 +94,16 @@ function App() {
 		}
 
 		for (let i = 1; i <= 60; i++) {
+			const isHourTick = i % 5 === 0;
 			const angle = i * 6 * (Math.PI / 180);
-			const x = Math.round(tickRadius * Math.cos(angle));
-			const y = Math.round(tickRadius * Math.sin(angle));
+			const x = tickRadius * Math.cos(angle);
+			const y = tickRadius * Math.sin(angle);
 
 			const tick = document.createElement("span");
-			tick.className = `${tag}tick`;
-			tick.style.left = `${x - 2}px`;
-			tick.style.top = `${y - 1}px`;
-			tick.style.transform = `rotate(${i * 6}deg)`;
+			tick.className = `tick${isHourTick ? " hourTick" : ""}`;
+			tick.style.left = `${x}px`;
+			tick.style.top = `${y}px`;
+			tick.style.setProperty("--tick-rotation", `${i * 6}deg`);
 			tickcontainer.appendChild(tick);
 		}
 	}
@@ -187,7 +188,7 @@ function App() {
 		const m = getdate.getMonth();
 		const y = getdate.getFullYear();
 		setDigitalDate(`${d}-${monthObj[m + 1]}-${y}`);
-		addnumberref.current("dark");
+		addnumberref.current();
 	}, []);
 
 	// Clock update interval - reacts to use24Hour changes
@@ -213,7 +214,7 @@ function App() {
 		if (!clockcircleref.current) return;
 
 		const regenerateNumbers = () => {
-			addnumberref.current(darkmode ? "" : "dark");
+			addnumberref.current();
 		};
 
 		// Initial generation
@@ -234,7 +235,7 @@ function App() {
 	const handleDarkModeToggle = () => {
 		const newDarkMode = !darkmode;
 		setDarkMode(newDarkMode);
-		addNumbers(newDarkMode ? "" : "dark");
+		addNumbers();
 	};
 
 	const handle24HourToggle = () => {

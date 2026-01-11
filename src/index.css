@@ -7,6 +7,11 @@
 	font-style: normal;
 }
 
+:root {
+	--base-tick-width: 6px;
+	--base-tick-height: 2px;
+}
+
 body {
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
@@ -108,18 +113,36 @@ code {
 
 .tick {
 	position: absolute;
-	height: 2px;
-	width: 6px;
+	--tick-width: var(--base-tick-width);
+	--tick-height: var(--base-tick-height);
+	/*
+		Tick alignment (outer edge):
+
+		- Each tick is positioned on the clock radius by its center (via translate(-50%, -50%)).
+		- The tick's "length" is its width, which (after rotation) points radially.
+		- If you make the hour ticks wider, they would normally grow equally inward + outward.
+		  To keep ALL ticks aligned on the *outer* edge, we shift wider ticks inward.
+
+		Theoretical inset for perfect geometry is:
+		  inset = (baseWidth - tickWidth) / 2
+
+		In practice, subpixel rendering / antialiasing and any small residual rounding in layout
+		can make the perfect /2 inset look slightly off, so this divisor is intentionally
+		tweakable. If you want strict geometry, set it back to 2.
+	*/
+	--tick-inset: calc((var(--base-tick-width) - var(--tick-width)) / 3.5);
+	width: var(--tick-width);
+	height: var(--tick-height);
 	background-color: var(--mutedText);
 	border-radius: 0;
+	transform: translate(-50%, -50%) rotate(var(--tick-rotation, 0deg))
+		translateX(var(--tick-inset));
+	transform-origin: 50% 50%;
 }
 
-.darktick {
-	position: absolute;
-	height: 2px;
-	width: 6px;
-	background-color: var(--mutedText);
-	border-radius: 0;
+.hourTick {
+	--tick-width: 14px;
+	--tick-height: 3px;
 }
 
 .hour {
