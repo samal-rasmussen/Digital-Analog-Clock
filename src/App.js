@@ -1,4 +1,3 @@
-import "./styles/clock.css";
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import { MdSettings, MdFullscreen, MdFullscreenExit } from "react-icons/md";
 
