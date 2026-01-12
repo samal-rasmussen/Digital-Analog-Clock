@@ -8,7 +8,7 @@
 }
 
 :root {
-	--base-tick-width: clamp(5px, 1.2vmin, 10px);
+	--base-tick-width: clamp(4px, 1.2vmin, 10px);
 	--base-tick-height: clamp(1.5px, 0.3vmin, 2px);
 }
 
@@ -95,20 +95,18 @@ code {
 
 .numbers {
 	position: relative;
-	transform: rotate(-90deg);
 }
 
 .number {
 	position: absolute;
 	font-size: clamp(18px, 4vmin, 32px);
 	font-weight: 600;
-	transform: rotate(90deg);
 	color: var(--text);
+	font-variant-numeric: tabular-nums;
 }
 
 .ticks {
 	position: relative;
-	transform: rotate(-90deg);
 }
 
 .tick {
@@ -141,15 +139,15 @@ code {
 }
 
 .hourTick {
-	--tick-width: clamp(10px, 2.1vmin, 22px);
+	--tick-width: clamp(8px, 2.1vmin, 22px);
 	--tick-height: clamp(2px, 0.5vmin, 3.5px);
 }
 
 .hour {
 	position: absolute;
 	background-color: var(--text);
-	height: clamp(65px, 13vmin, 130px);
-	width: clamp(4px, 0.8vmin, 8px);
+	height: clamp(50px, 13vmin, 130px);
+	width: clamp(5px, 0.82vmin, 10px);
 	transform: translateY(-50%);
 	z-index: 9;
 	transform-origin: bottom center;
@@ -175,7 +173,7 @@ code {
 
 .minute {
 	position: absolute;
-	height: clamp(65px, 17vmin, 150px);
+	height: clamp(70px, 18vmin, 160px);
 	width: clamp(3px, 0.6vmin, 6px);
 	background-color: var(--text);
 	transform: translateY(-50%);
@@ -203,7 +201,7 @@ code {
 
 .second {
 	position: absolute;
-	height: clamp(80px, 22vmin, 200px);
+	height: clamp(80px, 20vmin, 210px);
 	width: clamp(1.5px, 0.3vmin, 2.5px);
 	transform: translateY(-50%);
 	z-index: 999;
@@ -240,38 +238,39 @@ code {
 }
 
 .datecontainer {
-	padding: clamp(10px, 2vh, 20px);
+	padding: clamp(10px, 1.6vh, 20px);
 	padding-left: clamp(15px, 3vw, 30px);
 	padding-right: clamp(15px, 3vw, 30px);
 	background-color: var(--surface);
 	color: var(--text);
 	font-weight: 500;
-	font-size: clamp(16px, 2.5vw, 24px);
+	font-size: clamp(16px, 2.3vw, 24px);
 	border-radius: 12px;
 	border: 1px solid var(--border);
 }
 
 .timecontainer {
-	padding: clamp(10px, 2vh, 20px);
-	padding-left: clamp(15px, 3vw, 30px);
-	padding-right: clamp(15px, 3vw, 30px);
+	padding: clamp(10px, 1.6vh, 20px);
+	padding-left: clamp(15px, 2.6vw, 30px);
+	padding-right: clamp(15px, 2.6vw, 30px);
 	background-color: var(--surface);
 	color: var(--text);
 	font-weight: 500;
-	font-size: clamp(28px, 5vw, 45px);
+	font-size: clamp(28px, 4.6vw, 65px);
 	border-radius: 12px;
 	border: 1px solid var(--border);
 	font-variant-numeric: tabular-nums;
+	white-space: nowrap;
 }
 
 .amorpm {
-	padding: clamp(9px, 1.8vh, 18px);
-	padding-left: clamp(13px, 2.6vw, 26px);
-	padding-right: clamp(13px, 2.6vw, 26px);
+	padding: clamp(9px, 1.2vh, 18px);
+	padding-left: clamp(13px, 2vw, 26px);
+	padding-right: clamp(13px, 2vw, 26px);
 	background-color: var(--surface);
 	color: var(--mutedText);
 	font-weight: 500;
-	font-size: clamp(26px, 4.8vw, 43px);
+	font-size: clamp(26px, 3.8vw, 60px);
 	border-radius: 12px;
 	margin-left: clamp(8px, 1.5vw, 15px);
 	border: 1px solid var(--border);

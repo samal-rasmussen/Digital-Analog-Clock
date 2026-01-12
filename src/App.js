@@ -73,22 +73,24 @@ function App() {
 		const tickRadius = clockRadius * 0.89; // Ticks at 89% of radius
 
 		// Calculate shifts based on clock size
-		const horshift = -clockSize * 0.03; // ~3% of clock size
-		const vershift = -clockSize * 0.02; // ~2% of clock size
+		const horshift = -clockSize * 0.035; // ~3% of clock size
+		const vershift = -clockSize * 0.034; // ~2% of clock size
 
 		numbersContainer.innerHTML = "";
 		tickcontainer.innerHTML = "";
 
 		for (let i = 1; i <= 12; i++) {
+			const shiftedI = (i + 3) % 12 || 12;
+			const shiftedHShift = shiftedI < 10 ? horshift / 2 : horshift;
 			const angle = i * 30 * (Math.PI / 180);
 			const x = Math.round(numberRadius * Math.cos(angle));
 			const y = Math.round(numberRadius * Math.sin(angle));
 
 			const number = document.createElement("span");
 			number.className = "number";
-			number.style.left = `${x + horshift}px`;
+			number.style.left = `${x + shiftedHShift}px`;
 			number.style.top = `${y + vershift}px`;
-			number.textContent = i;
+			number.textContent = shiftedI;
 
 			numbersContainer.appendChild(number);
 		}
@@ -376,7 +378,7 @@ function App() {
 					<div className="datecontainer">
 						<span className="date">{digitaldate}</span>
 					</div>
-					<div className="">
+					<div>
 						<span className="timecontainer">{digitaltime}</span>
 						{!use24Hour && <span className="amorpm">{amorpm}</span>}
 					</div>
