@@ -10,15 +10,32 @@
 :root {
 	--base-tick-width: clamp(4px, 1.2vmin, 10px);
 	--base-tick-height: clamp(1.5px, 0.3vmin, 2px);
+
+	/* Default theme (used before JS applies .dark/.light) */
+	--bg: #f5f5f5;
+	--surface: #ffffff;
+	--surface2: #e8e8e8;
+	--text: #1a1a1a;
+	--mutedText: #666666;
+	--border: #cccccc;
+	--accent: #4a9eff;
+}
+
+@media (prefers-color-scheme: dark) {
+	:root {
+		--bg: #0a0a0a;
+		--surface: #1a1a1a;
+		--surface2: #2a2a2a;
+		--text: #f0f0f0;
+		--mutedText: #999999;
+		--border: #444444;
+		--accent: #5a9eff;
+	}
 }
 
 body {
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
-}
-
-code {
-	font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
 }
 
 /* Theme Variables */
@@ -61,60 +78,72 @@ code {
 }
 
 .clockcircle {
-	position: relative;
-	width: clamp(280px, 70vmin, 900px);
-	height: clamp(280px, 70vmin, 900px);
+	--clock-size: clamp(280px, 70vmin, 900px);
+	width: var(--clock-size);
+	height: var(--clock-size);
 	aspect-ratio: 1;
+
+	/* Prefer container units for radii when supported */
+	container-type: size;
+	--number-radius: 37cqw;
+	--tick-radius: 44.5cqw;
+
+	position: relative;
 	border-radius: 50%;
 	border: 3px solid var(--border);
 	display: flex;
 	justify-content: center;
 	align-items: center;
 	background-color: var(--surface);
+
+	/* Hand angles (set by JS) */
+	--hour-angle: 0deg;
+	--minute-angle: 0deg;
+	--second-angle: 0deg;
 }
 
-.numbers {
-	position: relative;
+/* Fallback for browsers without container query units */
+@supports not (width: 1cqw) {
+	.clockcircle {
+		--number-radius: calc(var(--clock-size) * 0.37);
+		--tick-radius: calc(var(--clock-size) * 0.445);
+	}
+}
+
+.numbers,
+.ticks {
+	position: absolute;
+	inset: 0;
+	pointer-events: none;
 }
 
 .number {
 	position: absolute;
+	left: 50%;
+	top: 50%;
 	font-size: clamp(18px, 4vmin, 32px);
 	font-weight: 600;
 	color: var(--text);
 	font-variant-numeric: tabular-nums;
-}
-
-.ticks {
-	position: relative;
+	transform: translate(-50%, -50%) rotate(var(--angle))
+		translateY(calc(-1 * var(--number-radius))) rotate(calc(-1 * var(--angle)));
 }
 
 .tick {
 	position: absolute;
+	left: 50%;
+	top: 50%;
+
 	--tick-width: var(--base-tick-width);
 	--tick-height: var(--base-tick-height);
-	/*
-		Tick alignment (outer edge):
 
-		- Each tick is positioned on the clock radius by its center (via translate(-50%, -50%)).
-		- The tick's "length" is its width, which (after rotation) points radially.
-		- If you make the hour ticks wider, they would normally grow equally inward + outward.
-		  To keep ALL ticks aligned on the *outer* edge, we shift wider ticks inward.
-
-		Theoretical inset for perfect geometry is:
-		  inset = (baseWidth - tickWidth) / 2
-
-		In practice, subpixel rendering / antialiasing and any small residual rounding in layout
-		can make the perfect /2 inset look slightly off, so this divisor is intentionally
-		tweakable. If you want strict geometry, set it back to 2.
-	*/
-	--tick-inset: calc((var(--base-tick-width) - var(--tick-width)) / 3.5);
 	width: var(--tick-width);
 	height: var(--tick-height);
 	background-color: var(--mutedText);
 	border-radius: 0;
-	transform: translate(-50%, -50%) rotate(var(--tick-rotation, 0deg))
-		translateX(var(--tick-inset));
+
+	transform: translate(-50%, -50%) rotate(var(--angle)) translateY(calc(-1 * var(--tick-radius)))
+		rotate(90deg);
 	transform-origin: 50% 50%;
 }
 
@@ -123,56 +152,44 @@ code {
 	--tick-height: clamp(2px, 0.5vmin, 3.5px);
 }
 
-.hour {
+.noTransition {
+	transition: none !important;
+}
+
+.hour,
+.minute,
+.second {
 	position: absolute;
+	transform-origin: bottom center;
+	border-radius: 2px;
+}
+
+.hour {
 	background-color: var(--text);
 	height: clamp(50px, 13vmin, 130px);
 	width: clamp(5px, 0.82vmin, 10px);
-	transform: translateY(-50%);
 	z-index: 9;
-	transform-origin: bottom center;
 	transition: transform 1s ease;
-	border-radius: 2px;
-}
-
-.hour::before {
-	display: none;
-}
-
-.hour::after {
-	display: none;
+	transform: translateY(-50%) rotate(var(--hour-angle));
 }
 
 .minute {
-	position: absolute;
 	height: clamp(70px, 18vmin, 160px);
 	width: clamp(3px, 0.6vmin, 6px);
 	background-color: var(--text);
-	transform: translateY(-50%);
 	z-index: 99;
-	transform-origin: bottom center;
 	transition: transform 1s ease;
-	border-radius: 2px;
-}
-
-.minute::before {
-	display: none;
-}
-
-.minute::after {
-	display: none;
+	transform: translateY(-50%) rotate(var(--minute-angle));
 }
 
 .second {
-	position: absolute;
 	height: clamp(80px, 20vmin, 210px);
 	width: clamp(1.5px, 0.3vmin, 2.5px);
-	transform: translateY(-50%);
 	z-index: 999;
 	background-color: var(--accent);
-	transform-origin: bottom center;
 	transition: transform 0.3s ease;
 	border-radius: 1px;
+	transform: translateY(-50%) rotate(var(--second-angle));
 }
 
 .second::after {
@@ -185,10 +202,6 @@ code {
 	bottom: 0;
 	left: 50%;
 	transform: translate(-50%, 50%);
-}
-
-.second::before {
-	display: none;
 }
 
 .clockmanager {
@@ -211,6 +224,11 @@ code {
 	font-size: clamp(16px, 2.3vw, 24px);
 	border-radius: 12px;
 	border: 1px solid var(--border);
+}
+
+.timeRow {
+	display: flex;
+	align-items: center;
 }
 
 .timecontainer {
@@ -260,33 +278,32 @@ code {
 	opacity: 1;
 }
 
-/* Positioned icon buttons (e.g. top-right corner controls) */
 .floatingIconButton {
 	position: absolute;
 	top: 20px;
 	z-index: 100;
 }
 
-/* Fullscreen Button */
 .fullscreenButton {
 	right: 72px;
 }
 
 .fullscreenIcon {
-	height: 32px;
-	width: 32px;
+	display: block;
+	font-size: 28px;
 	color: var(--text);
+	line-height: 1;
 }
 
-/* Settings Button */
 .settingsButton {
 	right: 24px;
 }
 
 .settingsIcon {
-	height: 32px;
-	width: 32px;
+	display: block;
+	font-size: 28px;
 	color: var(--text);
+	line-height: 1;
 }
 
 @media (min-width: 540px) {
@@ -294,18 +311,13 @@ code {
 		right: 88px;
 	}
 
-	.fullscreenIcon {
-		height: 40px;
-		width: 40px;
+	.fullscreenIcon,
+	.settingsIcon {
+		font-size: 34px;
 	}
 
 	.settingsButton {
 		right: 32px;
-	}
-
-	.settingsIcon {
-		height: 40px;
-		width: 40px;
 	}
 }
 
@@ -324,6 +336,10 @@ code {
 	animation: fadeIn 0.2s ease;
 }
 
+.settingsOverlay[hidden] {
+	display: none;
+}
+
 @keyframes fadeIn {
 	from {
 		opacity: 0;
@@ -333,7 +349,6 @@ code {
 	}
 }
 
-/* Settings Modal */
 .settingsModal {
 	background-color: var(--surface);
 	border-radius: 16px;
@@ -491,5 +506,18 @@ code {
 
 	.clockmanager {
 		min-height: 40vh;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.hour,
+	.minute,
+	.second {
+		transition: none !important;
+	}
+
+	.settingsOverlay,
+	.settingsModal {
+		animation: none !important;
 	}
 }

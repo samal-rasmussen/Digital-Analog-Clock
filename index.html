@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Digital / Analog Clock</title>
+		<link rel="stylesheet" href="./styles.css" />
+	</head>
+	<body>
+		<div id="app">
+			<div class="main">
+				<button
+					id="fullscreenButton"
+					type="button"
+					class="iconButton floatingIconButton fullscreenButton"
+					aria-label="Enter fullscreen"
+				>
+					<span class="fullscreenIcon" aria-hidden="true">⛶</span>
+				</button>
+
+				<button
+					id="settingsButton"
+					type="button"
+					class="iconButton floatingIconButton settingsButton"
+					aria-label="Settings"
+				>
+					<span class="settingsIcon" aria-hidden="true">⚙</span>
+				</button>
+
+				<div class="clockcontainer">
+					<div id="clockcircle" class="clockcircle">
+						<div id="numbers" class="numbers" aria-hidden="true"></div>
+						<div id="ticks" class="ticks" aria-hidden="true"></div>
+						<div id="hourHand" class="hour"></div>
+						<div id="minuteHand" class="minute"></div>
+						<span id="secondHand" class="second"></span>
+					</div>
+				</div>
+
+				<div class="clockmanager">
+					<div class="datecontainer">
+						<span id="date" class="date"></span>
+					</div>
+					<div class="timeRow">
+						<span id="time" class="timecontainer"></span>
+						<span id="amorpm" class="amorpm" hidden></span>
+					</div>
+				</div>
+			</div>
+
+			<div
+				id="settingsOverlay"
+				class="settingsOverlay"
+				hidden
+				role="dialog"
+				aria-modal="true"
+				aria-labelledby="settings-title"
+			>
+				<div class="settingsModal" role="document">
+					<div class="settingsHeader">
+						<h2 id="settings-title" class="settingsTitle">Settings</h2>
+						<button
+							id="settingsClose"
+							type="button"
+							class="iconButton settingsClose"
+							aria-label="Close settings"
+						>
+							✕
+						</button>
+					</div>
+					<div class="settingsContent">
+						<div class="settingsRow">
+							<label class="settingsLabel" for="darkModeToggle">
+								<span>Dark Mode</span>
+								<input id="darkModeToggle" type="checkbox" class="settingsToggle" />
+							</label>
+						</div>
+						<div class="settingsRow">
+							<label class="settingsLabel" for="use24HourToggle">
+								<span>24-Hour Time</span>
+								<input
+									id="use24HourToggle"
+									type="checkbox"
+									class="settingsToggle"
+								/>
+							</label>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<script type="module" src="./app.js"></script>
+	</body>
+</html>

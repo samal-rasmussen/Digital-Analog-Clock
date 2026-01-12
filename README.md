@@ -1,22 +1,19 @@
 # Digital/Analog-clock
 
-to view the project click [view.](https://analog-clock-by-varun.netlify.app/)
-
 ## To run this project in your computer follow below steps-
 
 1.download this project code.
 
 2.extract the project to your desired folder.
 
-3.run `npm install` command to install all required dependencies(make sure your terminal is open in the same folder).
+3.(optional) run `npm install` to install the dev server (no build step is used).
 
     npm install
 
-4.then simply run `npm start` command to run development server.
+4.then run `npm dev` command to run the development server.
 
-    npm start
+    npm dev
 
-5.then changes that you made in app.js file will directly reflected on the page.
-
+5.then changes that you made in `app.js` / `styles.css` will directly be reflected on the page.
 
 ...thank you...
