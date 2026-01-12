@@ -52,26 +52,6 @@ code {
 	gap: 20px;
 }
 
-.popup {
-	position: absolute;
-	top: 0;
-	left: 0;
-	height: 100vh;
-	width: 100vw;
-	background-color: #000000bc;
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	color: #cfcdcd;
-	font-size: 10vw;
-	font-weight: 600;
-	z-index: 9999;
-}
-
-.popup p {
-	margin: 2vw;
-}
-
 .clockcontainer {
 	flex: 1;
 	display: flex;
@@ -163,14 +143,6 @@ code {
 	display: none;
 }
 
-.hourleft {
-	display: none;
-}
-
-.hourright {
-	display: none;
-}
-
 .minute {
 	position: absolute;
 	height: clamp(70px, 18vmin, 160px);
@@ -188,14 +160,6 @@ code {
 }
 
 .minute::after {
-	display: none;
-}
-
-.minuteleft {
-	display: none;
-}
-
-.minuteright {
 	display: none;
 }
 
