@@ -54,9 +54,7 @@ src/
 
 In `App.js`, the main state values are:
 
--   `digitaltime` — formatted `HH : MM : SS` string for the digital display
--   `digitaldate` — formatted date string (e.g. `D-MMM-YYYY`)
--   `amorpm` — `"AM"` / `"PM"` (empty in 24h mode)
+-   `nowMs` — single “time source” (`Date.now()` as a number) updated every second; **digital time/date are derived from this during render**
 -   `darkmode` — toggles root wrapper class `"dark"` vs `"light"` (controls CSS variables)
 -   `use24Hour` — controls digital formatting and whether AM/PM is rendered
 -   `settingsOpen` — controls whether the settings modal is rendered
@@ -66,8 +64,8 @@ In `App.js`, the main state values are:
 
 The app registers and cleans up these behaviors:
 
--   **Pre-paint clock sync**: calls `updateClock()` in a `useLayoutEffect` so hands/time/date are correct on the first paint (avoids initial “pointing at 12” / placeholder flicker)
--   **1s clock interval**: calls `updateClock()` every second
+-   **Pre-paint hand sync**: calls `updateHands(new Date())` in a `useLayoutEffect` so hands are correct on the first paint (avoids initial “pointing at 12” flash)
+-   **1s clock interval**: calls `tick()` every second, which updates `nowMs` and updates the 3 hand transforms using the same `Date`
 -   **ResizeObserver on `.clockcircle`**: regenerates numbers/ticks when the clock resizes
 -   **Escape key handler**: closes settings modal when open
 -   **Fullscreen change listeners**: keeps `isFullscreen` in sync even when exiting via ESC / browser UI
@@ -76,7 +74,7 @@ The app registers and cleans up these behaviors:
 
 ### Hand angles (analog)
 
-`updateClock()` computes angles:
+`updateHands(date)` computes angles:
 
 -   Hour: `30 * hours + minutes / 2`
 -   Minute: `6 * minutes`
@@ -88,14 +86,16 @@ and sets transforms directly on the hand elements.
 
 ### Digital formatting (12h / 24h)
 
--   24h default is derived from `Intl.DateTimeFormat(...).resolvedOptions()`
--   24h mode hides AM/PM
+-   24h default is derived once from `Intl.DateTimeFormat(...).resolvedOptions()`
+-   Digital time/date/AMPM are **derived during render** from `nowMs` and `use24Hour` using `Intl.DateTimeFormat(...).formatToParts()` / `.format()`
+-   The time is rendered in the visual format `HH : MM : SS`
+-   24h mode hides the AM/PM element; 12h mode displays the locale-provided `dayPeriod` string
+-   Date uses locale formatting (month short + day + year) and strips commas for presentation
 -   Digital digits use `font-variant-numeric: tabular-nums` to reduce width jitter
--   The initial digital time/date are computed during state initialization so the first render does not show placeholder values
 
 ### Clock face generation (numbers + ticks)
 
-`addNumbers()` rebuilds the face imperatively:
+`regenerateClockFace()` rebuilds the face imperatively:
 
 -   Clears `.numbers` and `.ticks` with `innerHTML = ""`
 -   Adds:
@@ -145,10 +145,10 @@ The fullscreen button toggles between `document.documentElement.requestFullscree
 ## Known pitfalls / guardrails
 
 -   Keep **one** clock interval and always clean it up.
--   `addNumbers()` is imperative and clears/rebuilds nodes; avoid mixing with a declarative render of those same nodes.
+-   `regenerateClockFace()` is imperative and clears/rebuilds nodes; avoid mixing with a declarative render of those same nodes.
 -   `ResizeObserver` drives face regeneration; if you change `.clockcircle` structure, keep the observer target correct.
 -   If you adjust CSS rotations on `.numbers`/`.ticks`, revisit the “shifted number label” logic in `addNumbers()`.
--   The date is updated from within `updateClock()` (with a “only update when changed” guard) so it stays correct across midnight; if you remove that logic, the date can go stale after midnight.
+-   `nowMs` updates every second; if you stop updating it, digital time/date will stop updating (and the date can go stale across midnight).
 
 ## Porting notes (framework-agnostic starting point)
 
@@ -156,7 +156,7 @@ If you ever port this UI to another framework, the key is to preserve these cont
 
 -   **State**: the values listed in “State model” and what UI they drive
 -   **Lifecycle**:
-    -   start/stop a 1s timer for `updateClock()`
+    -   start/stop a 1s timer for `tick()`
     -   attach/detach resize, keydown, fullscreenchange listeners
     -   attach/detach a ResizeObserver on the clock circle
 -   **DOM refs**: you will still need direct handles to the 3 hands (or an equivalent rendering strategy) and containers for numbers/ticks (unless you fully re-implement face generation declaratively)
