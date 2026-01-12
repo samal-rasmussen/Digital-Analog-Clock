@@ -1,20 +1,25 @@
 import React, { useEffect, useLayoutEffect, useRef, useState, useCallback } from "react";
 import { MdSettings, MdFullscreen, MdFullscreenExit } from "react-icons/md";
 
-const monthObj = {
-	1: "Jan",
-	2: "Feb",
-	3: "Mar",
-	4: "Apr",
-	5: "May",
-	6: "June",
-	7: "July",
-	8: "Aug",
-	9: "Sept",
-	10: "Oct",
-	11: "Nov",
-	12: "Dec",
-};
+const timeFormatter12 = new Intl.DateTimeFormat(undefined, {
+	hour: "2-digit",
+	minute: "2-digit",
+	second: "2-digit",
+	hour12: true,
+});
+
+const timeFormatter24 = new Intl.DateTimeFormat(undefined, {
+	hour: "2-digit",
+	minute: "2-digit",
+	second: "2-digit",
+	hour12: false,
+});
+
+const dateFormatter = new Intl.DateTimeFormat(undefined, {
+	day: "numeric",
+	month: "short",
+	year: "numeric",
+});
 
 function getDefault24Hour() {
 	try {
@@ -32,32 +37,23 @@ function getDefault24Hour() {
 	return false;
 }
 
-function formatTimeComponent(component) {
-	return component > 9 ? component : `0${component}`;
-}
+function formatDigitalDisplay(date, use24Hour) {
+	const parts = (use24Hour ? timeFormatter24 : timeFormatter12).formatToParts(date);
+	const hour = parts.find((p) => p.type === "hour")?.value ?? "";
+	const minute = parts.find((p) => p.type === "minute")?.value ?? "";
+	const second = parts.find((p) => p.type === "second")?.value ?? "";
+	const dayPeriod = parts.find((p) => p.type === "dayPeriod")?.value ?? "";
 
-function formatDigitalTime(date, use24Hour) {
-	const hours = date.getHours();
-	const minutes = date.getMinutes();
-	const seconds = date.getSeconds();
+	// Keep existing visual style: `HH : MM : SS`
+	const digitaltime = `${hour} : ${minute} : ${second}`;
 
-	const formattedHours = use24Hour
-		? formatTimeComponent(hours)
-		: formatTimeComponent(hours % 12 === 0 ? 12 : hours % 12);
-	const formattedMinutes = formatTimeComponent(minutes);
-	const formattedSeconds = formatTimeComponent(seconds);
+	// In 24h mode we render no AM/PM element; in 12h mode we render whatever the locale supplies.
+	const amorpm = use24Hour ? "" : dayPeriod;
 
-	return {
-		digitaltime: `${formattedHours} : ${formattedMinutes} : ${formattedSeconds}`,
-		amorpm: use24Hour ? "" : hours >= 12 ? "PM" : "AM",
-	};
-}
+	// Locale-aware date; normalize by removing commas to avoid awkward punctuation in some locales.
+	const digitaldate = dateFormatter.format(date).replaceAll(",", "");
 
-function formatDate(date) {
-	const d = date.getDate();
-	const m = date.getMonth(); // 0-based
-	const y = date.getFullYear();
-	return `${d}-${monthObj[m + 1]}-${y}`;
+	return { digitaltime, amorpm, digitaldate };
 }
 
 function App() {
@@ -67,22 +63,30 @@ function App() {
 	const mintref = useRef();
 	const secdref = useRef();
 	const clockcircleref = useRef();
-	const addnumberref = useRef(addNumbers);
 	const isFirstPaintRef = useRef(true);
 
-	const default24Hour = getDefault24Hour();
-	const [use24Hour, setUse24Hour] = useState(() => default24Hour);
-
-	const [digitaltime, setDigitalTime] = useState(
-		() => formatDigitalTime(new Date(), default24Hour).digitaltime,
-	);
-	const [amorpm, setAmOrPm] = useState(() => formatDigitalTime(new Date(), default24Hour).amorpm);
-	const [digitaldate, setDigitalDate] = useState(() => formatDate(new Date()));
+	const [use24Hour, setUse24Hour] = useState(() => getDefault24Hour());
+	const [nowMs, setNowMs] = useState(() => Date.now());
 	const [darkmode, setDarkMode] = useState(true);
 	const [settingsOpen, setSettingsOpen] = useState(false);
 	const [isFullscreen, setIsFullscreen] = useState(() => Boolean(document.fullscreenElement));
 
-	function addNumbers() {
+	const now = new Date(nowMs);
+	const { digitaltime, amorpm, digitaldate } = formatDigitalDisplay(now, use24Hour);
+
+	/**
+	 * Render / update flow (high level)
+	 *
+	 * - `nowMs` is the single time source stored in React state.
+	 * - Every second, `tick()` runs:
+	 *    - captures `Date.now()` once
+	 *    - updates `nowMs` (triggers a re-render)
+	 *    - updates the 3 analog hand DOM nodes (imperative transforms) using the *same* Date
+	 * - During render, we derive the digital strings from `nowMs` + `use24Hour` via Intl:
+	 *    - `digitaltime` / `amorpm` / `digitaldate`
+	 * - `useLayoutEffect` sets the hands before first paint so the UI never flashes at 12 o'clock.
+	 */
+	const regenerateClockFace = useCallback(() => {
 		const numbersContainer = numbref.current;
 		const tickcontainer = tickref.current;
 		const clockCircle = clockcircleref.current;
@@ -131,19 +135,14 @@ function App() {
 			tick.style.setProperty("--tick-rotation", `${i * 6}deg`);
 			tickcontainer.appendChild(tick);
 		}
-	}
+	}, []);
 
-	const updateClock = useCallback(() => {
-		const date = new Date();
+	const updateHands = useCallback((date) => {
 		const hourstick = hourref.current;
 		const minutstick = mintref.current;
 		const secondstick = secdref.current;
 
 		if (!hourstick || !minutstick || !secondstick) return;
-
-		// Update date (handles midnight crossing)
-		const nextDate = formatDate(date);
-		setDigitalDate((prev) => (prev === nextDate ? prev : nextDate));
 
 		const hours = date.getHours();
 		const minutes = date.getMinutes();
@@ -192,46 +191,39 @@ function App() {
 		hourstick.style.transform = `translateY(-50%) rotate(${rotatehourhand}deg)`;
 		minutstick.style.transform = `translateY(-50%) rotate(${rotateminutehand}deg)`;
 		secondstick.style.transform = `translateY(-50%) rotate(${rotatesecondhand}deg)`;
+	}, []);
 
-		// Format hours based on 24h/12h setting
-		const formatted = formatDigitalTime(date, use24Hour);
-		setDigitalTime(formatted.digitaltime);
-		setAmOrPm(formatted.amorpm);
-	}, [use24Hour]);
+	const tick = useCallback(() => {
+		const ms = Date.now();
+		const date = new Date(ms);
+		setNowMs(ms);
+		updateHands(date);
+	}, [updateHands]);
 
 	// Set hands before first paint to avoid initial "pointing at 12" flash.
 	useLayoutEffect(() => {
-		updateClock();
-	}, [updateClock]);
-
-	// Initialize clock face on mount
-	useEffect(() => {
-		addnumberref.current();
-	}, []);
+		updateHands(new Date());
+	}, [updateHands]);
 
 	// Clock update interval - reacts to use24Hour changes
 	useEffect(() => {
-		const intervalId = setInterval(updateClock, 1000);
+		const intervalId = setInterval(tick, 1000);
 
 		return () => {
 			clearInterval(intervalId);
 		};
-	}, [updateClock]);
+	}, [tick]);
 
 	// Regenerate numbers/ticks when clock size changes
 	useEffect(() => {
 		if (!clockcircleref.current) return;
 
-		const regenerateNumbers = () => {
-			addnumberref.current();
-		};
-
 		// Initial generation
-		regenerateNumbers();
+		regenerateClockFace();
 
 		// Use ResizeObserver to watch clock circle size changes
 		const resizeObserver = new ResizeObserver(() => {
-			regenerateNumbers();
+			regenerateClockFace();
 		});
 
 		resizeObserver.observe(clockcircleref.current);
@@ -239,14 +231,14 @@ function App() {
 		return () => {
 			resizeObserver.disconnect();
 		};
-	}, []);
+	}, [regenerateClockFace]);
 
 	const handleDarkModeToggle = () => {
-		setDarkMode(!darkmode);
+		setDarkMode((v) => !v);
 	};
 
 	const handle24HourToggle = () => {
-		setUse24Hour(!use24Hour);
+		setUse24Hour((v) => !v);
 	};
 
 	const handleCloseSettings = () => {
