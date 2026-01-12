@@ -24,7 +24,6 @@ The intent is a **clean, responsive clock** with minimal jitter (tabular digits)
 
 -   `npm install` — install deps
 -   `npm start` — dev server (CRA; binds to `0.0.0.0`)
--   `npm test` — Jest / RTL (starter test may be stale)
 -   `npm run build` — production build
 
 ### Code map (where to look)
@@ -37,7 +36,6 @@ The intent is a **clean, responsive clock** with minimal jitter (tabular digits)
 src/
 ├── index.js    # Entry point
 ├── App.js      # Main component (logic + markup)
-├── App.test.js # Likely stale starter test
 └── index.css   # Single stylesheet
 ```
 
@@ -63,14 +61,13 @@ In `App.js`, the main state values are:
 -   `use24Hour` — controls digital formatting and whether AM/PM is rendered
 -   `settingsOpen` — controls whether the settings modal is rendered
 -   `isFullscreen` — reflects `document.fullscreenElement`
--   `windowWidth` — used to slightly alter minute-hand transform on small screens
 
 ### Event / lifecycle wiring (important implementation details)
 
 The app registers and cleans up these behaviors:
 
--   **1s clock interval**: calls `updateClock()` every second (and once immediately)
--   **Window resize listener**: keeps `windowWidth` up to date
+-   **Pre-paint clock sync**: calls `updateClock()` in a `useLayoutEffect` so hands/time/date are correct on the first paint (avoids initial “pointing at 12” / placeholder flicker)
+-   **1s clock interval**: calls `updateClock()` every second
 -   **ResizeObserver on `.clockcircle`**: regenerates numbers/ticks when the clock resizes
 -   **Escape key handler**: closes settings modal when open
 -   **Fullscreen change listeners**: keeps `isFullscreen` in sync even when exiting via ESC / browser UI
@@ -94,6 +91,7 @@ and sets transforms directly on the hand elements.
 -   24h default is derived from `Intl.DateTimeFormat(...).resolvedOptions()`
 -   24h mode hides AM/PM
 -   Digital digits use `font-variant-numeric: tabular-nums` to reduce width jitter
+-   The initial digital time/date are computed during state initialization so the first render does not show placeholder values
 
 ### Clock face generation (numbers + ticks)
 
@@ -150,6 +148,7 @@ The fullscreen button toggles between `document.documentElement.requestFullscree
 -   `addNumbers()` is imperative and clears/rebuilds nodes; avoid mixing with a declarative render of those same nodes.
 -   `ResizeObserver` drives face regeneration; if you change `.clockcircle` structure, keep the observer target correct.
 -   If you adjust CSS rotations on `.numbers`/`.ticks`, revisit the “shifted number label” logic in `addNumbers()`.
+-   The date is updated from within `updateClock()` (with a “only update when changed” guard) so it stays correct across midnight; if you remove that logic, the date can go stale after midnight.
 
 ## Porting notes (framework-agnostic starting point)
 

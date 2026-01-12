@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useCallback } from "react";
+import React, { useEffect, useLayoutEffect, useRef, useState, useCallback } from "react";
 import { MdSettings, MdFullscreen, MdFullscreenExit } from "react-icons/md";
 
 const monthObj = {
@@ -16,6 +16,50 @@ const monthObj = {
 	12: "Dec",
 };
 
+function getDefault24Hour() {
+	try {
+		const formatter = new Intl.DateTimeFormat(undefined, { hour: "numeric" });
+		const resolved = formatter.resolvedOptions();
+		if (resolved.hour12 !== undefined) {
+			return !resolved.hour12;
+		}
+		if (resolved.hourCycle) {
+			return resolved.hourCycle === "h23" || resolved.hourCycle === "h24";
+		}
+	} catch (e) {
+		// Fallback to 12h if detection fails
+	}
+	return false;
+}
+
+function formatTimeComponent(component) {
+	return component > 9 ? component : `0${component}`;
+}
+
+function formatDigitalTime(date, use24Hour) {
+	const hours = date.getHours();
+	const minutes = date.getMinutes();
+	const seconds = date.getSeconds();
+
+	const formattedHours = use24Hour
+		? formatTimeComponent(hours)
+		: formatTimeComponent(hours % 12 === 0 ? 12 : hours % 12);
+	const formattedMinutes = formatTimeComponent(minutes);
+	const formattedSeconds = formatTimeComponent(seconds);
+
+	return {
+		digitaltime: `${formattedHours} : ${formattedMinutes} : ${formattedSeconds}`,
+		amorpm: use24Hour ? "" : hours >= 12 ? "PM" : "AM",
+	};
+}
+
+function formatDate(date) {
+	const d = date.getDate();
+	const m = date.getMonth(); // 0-based
+	const y = date.getFullYear();
+	return `${d}-${monthObj[m + 1]}-${y}`;
+}
+
 function App() {
 	const numbref = useRef();
 	const tickref = useRef();
@@ -26,33 +70,17 @@ function App() {
 	const addnumberref = useRef(addNumbers);
 	const isFirstPaintRef = useRef(true);
 
-	const [digitaltime, setDigitalTime] = useState("00 : 00 : 00");
-	const [amorpm, setAmOrPm] = useState("--");
-	const [digitaldate, setDigitalDate] = useState("DD-MM-YYYY");
+	const default24Hour = getDefault24Hour();
+	const [use24Hour, setUse24Hour] = useState(() => default24Hour);
+
+	const [digitaltime, setDigitalTime] = useState(
+		() => formatDigitalTime(new Date(), default24Hour).digitaltime,
+	);
+	const [amorpm, setAmOrPm] = useState(() => formatDigitalTime(new Date(), default24Hour).amorpm);
+	const [digitaldate, setDigitalDate] = useState(() => formatDate(new Date()));
 	const [darkmode, setDarkMode] = useState(true);
 	const [settingsOpen, setSettingsOpen] = useState(false);
 	const [isFullscreen, setIsFullscreen] = useState(() => Boolean(document.fullscreenElement));
-
-	// Detect browser locale default for 24h format
-	const getDefault24Hour = () => {
-		try {
-			const formatter = new Intl.DateTimeFormat(undefined, { hour: "numeric" });
-			const resolved = formatter.resolvedOptions();
-			if (resolved.hour12 !== undefined) {
-				return !resolved.hour12;
-			}
-			if (resolved.hourCycle) {
-				return resolved.hourCycle === "h23" || resolved.hourCycle === "h24";
-			}
-		} catch (e) {
-			// Fallback to 12h if detection fails
-		}
-		return false;
-	};
-
-	const [use24Hour, setUse24Hour] = useState(() => getDefault24Hour());
-
-	const formatTimeComponent = (component) => (component > 9 ? component : `0${component}`);
 
 	function addNumbers() {
 		const numbersContainer = numbref.current;
@@ -113,6 +141,10 @@ function App() {
 
 		if (!hourstick || !minutstick || !secondstick) return;
 
+		// Update date (handles midnight crossing)
+		const nextDate = formatDate(date);
+		setDigitalDate((prev) => (prev === nextDate ? prev : nextDate));
+
 		const hours = date.getHours();
 		const minutes = date.getMinutes();
 		const seconds = date.getSeconds();
@@ -162,35 +194,23 @@ function App() {
 		secondstick.style.transform = `translateY(-50%) rotate(${rotatesecondhand}deg)`;
 
 		// Format hours based on 24h/12h setting
-		const formattedHours = use24Hour
-			? formatTimeComponent(hours)
-			: formatTimeComponent(hours % 12 === 0 ? 12 : hours % 12);
-		const formattedMinutes = formatTimeComponent(minutes);
-		const formattedSeconds = formatTimeComponent(seconds);
-
-		setDigitalTime(`${formattedHours} : ${formattedMinutes} : ${formattedSeconds}`);
-
-		// Only set AM/PM in 12h mode
-		if (use24Hour) {
-			setAmOrPm("");
-		} else {
-			setAmOrPm(hours >= 12 ? "PM" : "AM");
-		}
+		const formatted = formatDigitalTime(date, use24Hour);
+		setDigitalTime(formatted.digitaltime);
+		setAmOrPm(formatted.amorpm);
 	}, [use24Hour]);
 
-	// Initialize date on mount
+	// Set hands before first paint to avoid initial "pointing at 12" flash.
+	useLayoutEffect(() => {
+		updateClock();
+	}, [updateClock]);
+
+	// Initialize clock face on mount
 	useEffect(() => {
-		const getdate = new Date();
-		const d = getdate.getDate();
-		const m = getdate.getMonth();
-		const y = getdate.getFullYear();
-		setDigitalDate(`${d}-${monthObj[m + 1]}-${y}`);
 		addnumberref.current();
 	}, []);
 
 	// Clock update interval - reacts to use24Hour changes
 	useEffect(() => {
-		updateClock(); // Initial update
 		const intervalId = setInterval(updateClock, 1000);
 
 		return () => {
