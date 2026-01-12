@@ -30,7 +30,6 @@ function App() {
 	const [amorpm, setAmOrPm] = useState("--");
 	const [digitaldate, setDigitalDate] = useState("DD-MM-YYYY");
 	const [darkmode, setDarkMode] = useState(true);
-	const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 	const [settingsOpen, setSettingsOpen] = useState(false);
 	const [isFullscreen, setIsFullscreen] = useState(() => Boolean(document.fullscreenElement));
 
@@ -54,10 +53,6 @@ function App() {
 	const [use24Hour, setUse24Hour] = useState(() => getDefault24Hour());
 
 	const formatTimeComponent = (component) => (component > 9 ? component : `0${component}`);
-
-	const handleResize = () => {
-		setWindowWidth(window.innerWidth);
-	};
 
 	function addNumbers() {
 		const numbersContainer = numbref.current;
@@ -163,7 +158,7 @@ function App() {
 		}
 
 		hourstick.style.transform = `translateY(-50%) rotate(${rotatehourhand}deg)`;
-		minutstick.style.transform = `${windowWidth > 540 ? "translateY(-50%)" : "translate(-4%,-50%)"} rotate(${rotateminutehand}deg)`;
+		minutstick.style.transform = `translateY(-50%) rotate(${rotateminutehand}deg)`;
 		secondstick.style.transform = `translateY(-50%) rotate(${rotatesecondhand}deg)`;
 
 		// Format hours based on 24h/12h setting
@@ -181,7 +176,7 @@ function App() {
 		} else {
 			setAmOrPm(hours >= 12 ? "PM" : "AM");
 		}
-	}, [use24Hour, windowWidth]);
+	}, [use24Hour]);
 
 	// Initialize date on mount
 	useEffect(() => {
@@ -203,15 +198,7 @@ function App() {
 		};
 	}, [updateClock]);
 
-	// Window resize handler
-	useEffect(() => {
-		window.addEventListener("resize", handleResize);
-		return () => {
-			window.removeEventListener("resize", handleResize);
-		};
-	}, []);
-
-	// Regenerate numbers/ticks when clock size changes or theme changes
+	// Regenerate numbers/ticks when clock size changes
 	useEffect(() => {
 		if (!clockcircleref.current) return;
 
@@ -232,12 +219,10 @@ function App() {
 		return () => {
 			resizeObserver.disconnect();
 		};
-	}, [darkmode]);
+	}, []);
 
 	const handleDarkModeToggle = () => {
-		const newDarkMode = !darkmode;
-		setDarkMode(newDarkMode);
-		addNumbers();
+		setDarkMode(!darkmode);
 	};
 
 	const handle24HourToggle = () => {
