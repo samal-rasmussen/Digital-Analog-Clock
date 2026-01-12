@@ -276,11 +276,8 @@ code {
 	border: 1px solid var(--border);
 }
 
-/* Fullscreen Button */
-.fullscreenButton {
-	position: absolute;
-	top: 20px;
-	right: 72px;
+/* Icon Buttons (common styles) */
+.iconButton {
 	background: transparent;
 	border: none;
 	cursor: pointer;
@@ -288,12 +285,27 @@ code {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	z-index: 100;
-	transition: opacity 0.2s;
+	transition:
+		background-color 0.2s,
+		opacity 0.2s;
+	border-radius: 50%;
 }
 
-.fullscreenButton:hover {
-	opacity: 0.7;
+.iconButton:hover {
+	background-color: var(--surface);
+	opacity: 1;
+}
+
+/* Positioned icon buttons (e.g. top-right corner controls) */
+.floatingIconButton {
+	position: absolute;
+	top: 20px;
+	z-index: 100;
+}
+
+/* Fullscreen Button */
+.fullscreenButton {
+	right: 72px;
 }
 
 .fullscreenIcon {
@@ -304,22 +316,7 @@ code {
 
 /* Settings Button */
 .settingsButton {
-	position: absolute;
-	top: 20px;
 	right: 24px;
-	background: transparent;
-	border: none;
-	cursor: pointer;
-	padding: 8px;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	z-index: 100;
-	transition: opacity 0.2s;
-}
-
-.settingsButton:hover {
-	opacity: 0.7;
 }
 
 .settingsIcon {
@@ -330,7 +327,6 @@ code {
 
 @media (min-width: 540px) {
 	.fullscreenButton {
-		top: 20px;
 		right: 88px;
 	}
 
@@ -340,7 +336,6 @@ code {
 	}
 
 	.settingsButton {
-		top: 20px;
 		right: 32px;
 	}
 
@@ -415,22 +410,20 @@ code {
 }
 
 .settingsClose {
-	background: transparent;
-	border: none;
-	font-size: 32px;
+	font-size: 22px;
 	line-height: 1;
 	color: var(--mutedText);
-	cursor: pointer;
 	padding: 0;
 	width: 32px;
 	height: 32px;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	transition: color 0.2s;
+	transition:
+		background-color 0.2s,
+		opacity 0.2s,
+		color 0.2s;
 }
 
 .settingsClose:hover {
+	background-color: var(--surface2);
 	color: var(--text);
 }
 

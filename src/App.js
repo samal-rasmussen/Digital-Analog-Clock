@@ -300,7 +300,7 @@ function App() {
 			<div className="main">
 				<button
 					onClick={toggleFullscreen}
-					className="fullscreenButton"
+					className="iconButton floatingIconButton fullscreenButton"
 					aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
 				>
 					{isFullscreen ? (
@@ -311,7 +311,7 @@ function App() {
 				</button>
 				<button
 					onClick={() => setSettingsOpen(true)}
-					className="settingsButton"
+					className="iconButton floatingIconButton settingsButton"
 					aria-label="Settings"
 				>
 					<MdSettings className="settingsIcon" />
@@ -332,10 +332,10 @@ function App() {
 								</h2>
 								<button
 									onClick={handleCloseSettings}
-									className="settingsClose"
+									className="iconButton settingsClose"
 									aria-label="Close settings"
 								>
-									×
+									✕
 								</button>
 							</div>
 							<div className="settingsContent">
